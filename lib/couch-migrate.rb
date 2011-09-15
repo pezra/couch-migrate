@@ -20,23 +20,36 @@ class PersistedList
 
 end
 
-class CouchMigrate
+class Executer
+  def initialize(path)
+    @path = path
+    self
+  end
+
+  def go
+    load(@path)
+  end
+end
+
+class SimpleMigrater
   attr_reader :failed_migration
 
-  def initialize(persisted_list = nil)
+  def initialize(persisted_list = nil, executer = nil)
     @raw_migrations = []
     @existing_migrations = persisted_list || PersistedList.new
+    @executer = executer || Executer
     @directory = "db/migrations"
   end
 
-  def migrate
+  def migrate(quiet = false)
     @failed_migration, completed = nil, []
     pending_migrations.each do |migration|
       begin
-        load(@directory + migration)
+        @executer.new(@directory + migration).go
         completed << migration
       rescue Exception => e
         @failed_migration = migration
+        puts '-'*40, "FAILURE in migration (#{migration}): #{e.message}", '-'*10, e.backtrace, '-'*40 unless quiet
         return
       end
     end
@@ -81,3 +94,15 @@ class CouchMigrate
   end
 
 end
+
+class CouchPersistedList < PersistedList
+end
+
+class CouchExecuter < Executer
+  def initialize(path)
+    super
+    self
+  end
+
+end
+

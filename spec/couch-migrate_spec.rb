@@ -1,7 +1,17 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-describe "CouchMigrate", "#migrate" do
-  subject { CouchMigrate.new }
+describe "Rake task" do
+  it "works" do
+    persisted_list = CouchPersistedList.new
+    executer = CouchExecuter
+    migrater = SimpleMigrater.new(persisted_list, executer)
+    migrater.migrate
+  end
+
+end
+
+describe "SimpleMigrater", "#migrate" do
+  subject { SimpleMigrater.new }
 
   let(:file_name_1){ "1_migration_a.rb" }
   let(:file_name_2){ "2_migration_b.rb" }
@@ -40,7 +50,7 @@ describe "CouchMigrate", "#migrate" do
 
     it "stops when a migration file exits with an error, not processing any subsequent files afterwards" do
       subject.directory(path).pending_migrations.should == [file_name_1, file_name_2, file_name_3]
-      subject.migrate
+      subject.migrate(:quiet)
       subject.failed_migration.should == file_name_2
       subject.pending_migrations.should == [file_name_2, file_name_3]
     end
@@ -53,8 +63,8 @@ describe "CouchMigrate", "#migrate" do
 
 end
 
-describe "CouchMigrate", "sorting and filtering" do
-  subject { CouchMigrate.new }
+describe "SimpleMigrater", "sorting and filtering" do
+  subject { SimpleMigrater.new }
 
   it "sorts on migration numbers" do
     subject.raw_migrations(['2_name.rb','1_name.rb', '3_name.rb'])
