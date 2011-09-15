@@ -1,9 +1,31 @@
+class PersistedList
+
+  def initialize
+    @list = []
+  end
+
+  def get
+    @list
+  end
+
+  def set(arr)
+    raise "argument must be an array" unless arr.is_a?(Array)
+    @list = arr
+  end
+
+  def <<(arr)
+    raise "argument must be an array" unless arr.is_a?(Array)
+    @list.concat(arr).uniq!
+  end
+
+end
+
 class CouchMigrate
   attr_reader :failed_migration
 
-  def initialize
+  def initialize(persisted_list = nil)
     @raw_migrations = []
-    @existing_migrations = []
+    @existing_migrations = persisted_list || PersistedList.new
     @directory = "db/migrations"
   end
 
@@ -19,7 +41,7 @@ class CouchMigrate
       end
     end
   ensure
-    @existing_migrations.concat(completed).uniq!
+    @existing_migrations << completed
   end
 
   def directory(path=nil)
@@ -41,9 +63,8 @@ class CouchMigrate
   end
 
   def existing_migrations(arr=nil)
-    return @existing_migrations if arr.nil?
-    raise "argument must be an array" unless arr.is_a?(Array)
-    @existing_migrations = arr
+    return @existing_migrations.get if arr.nil?
+    @existing_migrations.set(arr)
     self
   end
 
