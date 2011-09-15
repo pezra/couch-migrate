@@ -10,6 +10,95 @@ describe "Rake task" do
 
 end
 
+describe "SimpleExecuter" do
+  subject{ SimpleExecuter }
+  let(:msg) { "this line was executed by the script" }
+  let(:execution_verification) { "raise '#{msg}'" }
+
+  describe "#go" do
+    let(:enabled) { [] }
+    it "executes a string (typically loaded from a script file)" do
+      lambda{ subject.new(enabled, execution_verification).go }.should raise_error(RuntimeError,msg)
+    end
+
+    it "enables classes to be defined" do
+      script =<<-EOS
+        class Foo
+          def test; #{execution_verification} end
+        end
+        up do
+          Foo.new.test
+        end
+      EOS
+      lambda{ subject.new([:up], script).go }.should raise_error(RuntimeError,msg)
+    end
+
+    it "enables classes to be defined, and they are namespaced" do
+      script =<<-EOS
+        class NamespacedFoo
+          def test; end
+        end
+        up do
+          NamespacedFoo.new.test
+          puts Module.constants.grep(/NamespacedFoo/).inspect
+          puts Namespaced.constants.grep(/NamespacedFoo/).inspect
+          puts SimpleExecuter::Namespaced.constants.grep(/NamespacedFoo/).inspect
+          puts SimpleExecuter.constants.grep(/NamespacedFoo/).inspect
+          puts
+        end
+      EOS
+
+      subject.new([:up], script).go
+
+          puts Module.constants.grep(/Foo/).inspect
+          puts SimpleExecuter::Namespaced.constants.grep(/Foo/).inspect
+          puts SimpleExecuter.constants.grep(/Foo/).inspect
+      Module.constants.include?(:NamespacedFoo).should == false
+      SimpleExecuter.constants.include?(:NamespacedFoo).should == false
+      SimpleExecuter::Namespaced.constants.include?(:NamespacedFoo).should == true
+    end
+  end
+
+  describe "#up" do
+    context "when enabled" do
+      let(:enabled) { [:up] }
+
+      it "executes its block of code" do
+        lambda{ subject.new(enabled,"up do raise '#{msg}' end").go }.should raise_error(RuntimeError,msg)
+      end
+    end
+
+    context "when disabled" do
+      let(:enabled) { [] }
+
+      it "does not executes its block of code" do
+        lambda{ subject.new(enabled,"up do raise '#{msg}' end").go }.should_not raise_error(RuntimeError,msg)
+      end
+    end
+
+  end
+
+  describe "#down" do
+    context "when enabled" do
+      let(:enabled) { [:down] }
+
+      it "executes its block of code" do
+        lambda{ subject.new(enabled,"down do raise '#{msg}' end").go }.should raise_error(RuntimeError,msg)
+      end
+    end
+
+    context "when disabled" do
+      let(:enabled) { [] }
+
+      it "does not executes its block of code" do
+        lambda{ subject.new(enabled,"down do raise '#{msg}' end").go }.should_not raise_error(RuntimeError,msg)
+      end
+    end
+
+  end
+
+end
+
 describe "SimpleMigrater", "#migrate" do
   subject { SimpleMigrater.new }
 
@@ -31,9 +120,9 @@ describe "SimpleMigrater", "#migrate" do
 
     before(:all) do
       path.mkpath
-      File.open(file_3,"w"){|f| f << " " }
-      File.open(file_2,"w"){|f| f << "raise '2 simulated failure'" }
-      File.open(file_1,"w"){|f| f << " " }
+      File.open(file_3,"w"){|f| f << "up do end" }
+      File.open(file_2,"w"){|f| f << "up do raise '2 simulated failure' end" }
+      File.open(file_1,"w"){|f| f << "up do end" }
     end
 
     after(:all) do
@@ -50,7 +139,7 @@ describe "SimpleMigrater", "#migrate" do
 
     it "stops when a migration file exits with an error, not processing any subsequent files afterwards" do
       subject.directory(path).pending_migrations.should == [file_name_1, file_name_2, file_name_3]
-      subject.migrate(:quiet)
+      subject.migrate(:quiet, :up)
       subject.failed_migration.should == file_name_2
       subject.pending_migrations.should == [file_name_2, file_name_3]
     end

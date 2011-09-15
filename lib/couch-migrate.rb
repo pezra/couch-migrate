@@ -1,3 +1,29 @@
+class SimpleExecuter
+  def initialize(enabled, str)
+    raise "'enabled' argument must be an Array of symbols (such as [:up, :down] or []" unless enabled.is_a?(Array)
+    @migration_str = str
+    @enabled = enabled
+    self
+  end
+
+  def go
+    Namespaced.module_eval(<<-EOS)
+      def self.up
+        yield if #{@enabled.include?(:up)}
+      end
+
+      def self.down
+        yield if #{@enabled.include?(:down)}
+      end
+    EOS
+
+    Namespaced.module_eval(@migration_str)
+  end
+
+  module Namespaced
+  end
+end
+
 class PersistedList
 
   def initialize
@@ -20,41 +46,34 @@ class PersistedList
 
 end
 
-class Executer
-  def initialize(path)
-    @path = path
-    self
-  end
-
-  def go
-    load(@path)
-  end
-end
-
 class SimpleMigrater
   attr_reader :failed_migration
 
-  def initialize(persisted_list = nil, executer = nil)
-    @raw_migrations = []
-    @existing_migrations = persisted_list || PersistedList.new
-    @executer = executer || Executer
-    @directory = "db/migrations"
-  end
+  def migrate(*args)
+    migration_reserved_args= [:quiet]
+    executer_args = args - migration_reserved_args
 
-  def migrate(quiet = false)
     @failed_migration, completed = nil, []
     pending_migrations.each do |migration|
       begin
-        @executer.new(@directory + migration).go
+        str = File.read(@directory + migration)
+        @executer.new(executer_args, str).go
         completed << migration
       rescue Exception => e
         @failed_migration = migration
-        puts '-'*40, "FAILURE in migration (#{migration}): #{e.message}", '-'*10, e.backtrace, '-'*40 unless quiet
+        puts '-'*40, "FAILURE in migration (#{migration}) with message:", e.message, '-'*10, e.backtrace[0...5], '-'*40 unless args.include?(:quiet)
         return
       end
     end
   ensure
     @existing_migrations << completed
+  end
+
+  def initialize(persisted_list = nil, executer = nil)
+    @raw_migrations = []
+    @existing_migrations = persisted_list || PersistedList.new
+    @executer = executer || SimpleExecuter
+    @directory = "db/migrations"
   end
 
   def directory(path=nil)
@@ -98,7 +117,7 @@ end
 class CouchPersistedList < PersistedList
 end
 
-class CouchExecuter < Executer
+class CouchExecuter < SimpleExecuter
   def initialize(path)
     super
     self
