@@ -19,7 +19,7 @@ Jeweler::Tasks.new do |gem|
   gem.license = "MIT"
   gem.summary = %Q{A simple migration system for CouchDB}
   gem.description = %Q{A one-way migration system for CouchDB}
-  gem.email = "greg.edwards@openlogic.com"
+  gem.email = "greg@greglearns.com"
   gem.authors = ["Greg Edwards"]
   # dependencies defined in Gemfile
 end
