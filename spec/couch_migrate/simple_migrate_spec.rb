@@ -2,16 +2,16 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe "Rake task" do
   it "works" do
-    persisted_list = CouchPersistedList.new
-    executer = CouchExecuter
-    migrater = SimpleMigrater.new(persisted_list, executer)
+    persisted_list = CouchMigrate::CouchPersistedList.new
+    executer = CouchMigrate::CouchExecuter
+    migrater = CouchMigrate::BaseMigrater.new(persisted_list, executer)
     migrater.migrate
   end
 
 end
 
-describe "CouchMigrate::SimpleExecuter" do
-  subject{ CouchMigrate::SimpleExecuter }
+describe "CouchMigrate::BaseExecuter" do
+  subject{ CouchMigrate::BaseExecuter }
   let(:msg) { "this line was executed by the script" }
   let(:execution_verification) { "raise '#{msg}'" }
 
@@ -42,8 +42,8 @@ describe "CouchMigrate::SimpleExecuter" do
           NamespacedFoo.new.test
           # puts Module.constants.grep(/NamespacedFoo/).inspect
           # puts Namespaced.constants.grep(/NamespacedFoo/).inspect
-          # puts SimpleExecuter::Namespaced.constants.grep(/NamespacedFoo/).inspect
-          # puts SimpleExecuter.constants.grep(/NamespacedFoo/).inspect
+          # puts BaseExecuter::Namespaced.constants.grep(/NamespacedFoo/).inspect
+          # puts BaseExecuter.constants.grep(/NamespacedFoo/).inspect
           # puts
         end
       EOS
@@ -51,12 +51,12 @@ describe "CouchMigrate::SimpleExecuter" do
       subject.new([:up], script).go
 
       # puts Module.constants.grep(/Foo/).inspect
-      # puts SimpleExecuter::Namespaced.constants.grep(/Foo/).inspect
-      # puts SimpleExecuter.constants.grep(/Foo/).inspect
+      # puts BaseExecuter::Namespaced.constants.grep(/Foo/).inspect
+      # puts BaseExecuter.constants.grep(/Foo/).inspect
 
       Module.constants.include?(:NamespacedFoo).should == false
-      CouchMigrate::SimpleExecuter.constants.include?(:NamespacedFoo).should == false
-      CouchMigrate::SimpleExecuter::Namespaced.constants.include?(:NamespacedFoo).should == true
+      CouchMigrate::BaseExecuter.constants.include?(:NamespacedFoo).should == false
+      CouchMigrate::BaseExecuter::Namespaced.constants.include?(:NamespacedFoo).should == true
     end
   end
 
@@ -100,8 +100,8 @@ describe "CouchMigrate::SimpleExecuter" do
 
 end
 
-describe "SimpleMigrater", "#migrate" do
-  subject { SimpleMigrater.new }
+describe "BaseMigrater", "#migrate" do
+  subject { CouchMigrate::BaseMigrater.new }
 
   let(:file_name_1){ "1_migration_a.rb" }
   let(:file_name_2){ "2_migration_b.rb" }
@@ -153,8 +153,8 @@ describe "SimpleMigrater", "#migrate" do
 
 end
 
-describe "SimpleMigrater", "sorting and filtering" do
-  subject { SimpleMigrater.new }
+describe "BaseMigrater", "sorting and filtering" do
+  subject { CouchMigrate::BaseMigrater.new }
 
   it "sorts on migration numbers" do
     subject.raw_migrations(['2_name.rb','1_name.rb', '3_name.rb'])

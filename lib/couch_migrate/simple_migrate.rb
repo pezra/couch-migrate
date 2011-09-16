@@ -1,6 +1,6 @@
 
 module CouchMigrate
-  class SimpleExecuter
+  class BaseExecuter
     def initialize(enabled, str)
       raise "'enabled' argument must be an Array of symbols (such as [:up, :down] or []" unless enabled.is_a?(Array)
       @migration_str = str
@@ -25,8 +25,10 @@ module CouchMigrate
     module Namespaced
     end
   end
+end
 
-  class PersistedList
+module CouchMigrate
+  class BasePersistedList
 
     def initialize
       @list = []
@@ -48,7 +50,10 @@ module CouchMigrate
 
   end
 
-  class SimpleMigrater
+end
+
+module CouchMigrate
+  class BaseMigrater
     attr_reader :failed_migration
 
     def migrate(*args)
@@ -73,8 +78,8 @@ module CouchMigrate
 
     def initialize(persisted_list = nil, executer = nil)
       @raw_migrations = []
-      @existing_migrations = persisted_list || PersistedList.new
-      @executer = executer || SimpleExecuter
+      @existing_migrations = persisted_list || BasePersistedList.new
+      @executer = executer || BaseExecuter
       @directory = "db/migrations"
     end
 
@@ -116,10 +121,31 @@ module CouchMigrate
 
   end
 
-  class CouchPersistedList < PersistedList
+end
+
+module CouchMigrate
+  class CouchPersistedList < BasePersistedList
+    def get
+      puts "couch get"
+      super
+    end
+
+    def set(arr)
+      puts "couch set"
+      super
+    end
+
+    def <<(arr)
+      puts "couch add"
+      super
+    end
+
   end
 
-  class CouchExecuter < SimpleExecuter
+end
+
+module CouchMigrate
+  class CouchExecuter < BaseExecuter
     def initialize(enabled, str)
       super
       self
