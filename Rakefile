@@ -10,6 +10,10 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 require 'rake'
+import 'lib/tasks/couch_migrate.rake'
+
+task 'environment' do
+end
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|

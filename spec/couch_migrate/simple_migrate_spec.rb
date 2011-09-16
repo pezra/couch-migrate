@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe "Rake task" do
   it "works" do
@@ -10,8 +10,8 @@ describe "Rake task" do
 
 end
 
-describe "SimpleExecuter" do
-  subject{ SimpleExecuter }
+describe "CouchMigrate::SimpleExecuter" do
+  subject{ CouchMigrate::SimpleExecuter }
   let(:msg) { "this line was executed by the script" }
   let(:execution_verification) { "raise '#{msg}'" }
 
@@ -40,22 +40,23 @@ describe "SimpleExecuter" do
         end
         up do
           NamespacedFoo.new.test
-          puts Module.constants.grep(/NamespacedFoo/).inspect
-          puts Namespaced.constants.grep(/NamespacedFoo/).inspect
-          puts SimpleExecuter::Namespaced.constants.grep(/NamespacedFoo/).inspect
-          puts SimpleExecuter.constants.grep(/NamespacedFoo/).inspect
-          puts
+          # puts Module.constants.grep(/NamespacedFoo/).inspect
+          # puts Namespaced.constants.grep(/NamespacedFoo/).inspect
+          # puts SimpleExecuter::Namespaced.constants.grep(/NamespacedFoo/).inspect
+          # puts SimpleExecuter.constants.grep(/NamespacedFoo/).inspect
+          # puts
         end
       EOS
 
       subject.new([:up], script).go
 
-          puts Module.constants.grep(/Foo/).inspect
-          puts SimpleExecuter::Namespaced.constants.grep(/Foo/).inspect
-          puts SimpleExecuter.constants.grep(/Foo/).inspect
+      # puts Module.constants.grep(/Foo/).inspect
+      # puts SimpleExecuter::Namespaced.constants.grep(/Foo/).inspect
+      # puts SimpleExecuter.constants.grep(/Foo/).inspect
+
       Module.constants.include?(:NamespacedFoo).should == false
-      SimpleExecuter.constants.include?(:NamespacedFoo).should == false
-      SimpleExecuter::Namespaced.constants.include?(:NamespacedFoo).should == true
+      CouchMigrate::SimpleExecuter.constants.include?(:NamespacedFoo).should == false
+      CouchMigrate::SimpleExecuter::Namespaced.constants.include?(:NamespacedFoo).should == true
     end
   end
 
