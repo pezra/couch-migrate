@@ -1,2 +1,2 @@
 require_relative 'couch_migrate_railtie.rb' if defined?(Rails)
-require 'couch_migrate/simple_migrate'
+Dir["#{File.dirname(__FILE__)}/couch_migrate/**/*.rb"].each {|f| require f}
