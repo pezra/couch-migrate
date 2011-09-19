@@ -1,35 +1,18 @@
 require 'pathname'
+require 'yaml'
 
 module CouchMigrate
   class FilePersistedList < BasePersistedList
     def initialize(directory="db/migrate")
       super()
-      require 'yaml'
-      @path = Pathname.new(directory)+"meta.yml"
+      path = Pathname.new(directory)
+      path.mkpath
+      @path = path+"meta.yml"
       read
+      self
     end
 
-    def get
-      read
-      super
-    end
-
-    def set(arr)
-      super
-      write
-    end
-
-    def <<(arr)
-      super
-      write
-    end
-
-    def reset
-      super
-      @path.delete rescue nil
-    end
-
-    private
+    protected
 
     def read
       @data = YAML.load(File.read(@path)) rescue {}
@@ -40,6 +23,10 @@ module CouchMigrate
     def write
       @data[:complete] = @list
       File.open(@path,"w"){|f| f<< YAML.dump(@data) }
+    end
+
+    def cleanup
+      @path.delete rescue nil
     end
 
   end
