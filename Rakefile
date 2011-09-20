@@ -19,10 +19,10 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.name = "couch-migrate"
-  gem.homepage = "http://github.com/greg@greglearns.com/couch-migrate"
+  gem.homepage = "https://github.com/gedwards/couch-migrate"
   gem.license = "MIT"
   gem.summary = %Q{A simple migration system for CouchDB}
-  gem.description = %Q{A one-way migration system for CouchDB}
+  gem.description = %Q{A simple migration system for CouchDB.}
   gem.email = "greg@greglearns.com"
   gem.authors = ["Greg Edwards"]
   # dependencies defined in Gemfile

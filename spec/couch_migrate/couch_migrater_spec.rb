@@ -40,6 +40,7 @@ describe "CouchMigrater", "#migrate" do
 
     it "handles a sequence of migration added over time" do
       params = [:up, :quiet]
+      down_params = [:down, :quiet]
 
       # should succeed
       File.open(file_path_1,"w"){|f| f << "up do end" }
@@ -66,6 +67,14 @@ describe "CouchMigrater", "#migrate" do
       # resetting the migration causes all to be run next time
       migrater.reset
       migrater.migrate(*params).should == {success: [file_name_1, file_name_2, file_name_3]}
+
+      # Down * 3
+      migrater.migrate(*down_params).should == {success: [file_name_3]}
+      migrater.migrate(*down_params).should == {success: [file_name_2]}
+      migrater.migrate(*down_params).should == {success: [file_name_1]}
+
+      # Down does nothing
+      migrater.migrate(*down_params).should == {}
     end
 
   end

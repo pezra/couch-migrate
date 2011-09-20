@@ -72,8 +72,10 @@ describe "FileMigrater", "#migrate" do
       migrater.reset
       migrater.migrate(*up_params).should == {success: [file_name_1, file_name_2, file_name_3]}
 
-      # resetting the migration causes all to be run next time
-      migrater.reset
+      # Down * 3
+      migrater.migrate(*down_params).should == {success: [file_name_3]}
+      migrater.migrate(*down_params).should == {success: [file_name_2]}
+      migrater.migrate(*down_params).should == {success: [file_name_1]}
 
       # Down does nothing
       migrater.migrate(*down_params).should == {}

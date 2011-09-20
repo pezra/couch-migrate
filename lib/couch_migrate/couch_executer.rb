@@ -1,6 +1,6 @@
 module CouchMigrate
   class CouchExecuter < BaseExecuter
-    def initialize(enabled, str)
+    def initialize(enabled, str, filename = nil)
       super
       self
     end

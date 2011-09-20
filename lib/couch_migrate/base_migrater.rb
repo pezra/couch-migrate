@@ -16,7 +16,7 @@ module CouchMigrate
 
       @failed_migration, completed = nil, []
       direction, action, migrations = if args.include?(:down)
-        [:down, :remove, [filter_and_sort(completed_migrations).last]]
+        [:down, :remove, [completed_migrations.last]]
       else
         [:up, :add, pending_migrations]
       end
@@ -25,7 +25,7 @@ module CouchMigrate
         begin
           puts '-'*40, "Migration #{direction} (#{migration})" unless args.include?(:quiet)
           str = File.read(@directory + migration)
-          @executer.new(executer_args, str).go
+          @executer.new(executer_args, str, migration).go
           completed << migration
           puts '-'*40 unless args.include?(:quiet)
         rescue Exception => e
