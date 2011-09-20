@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "couch-migrate.gemspec",
+    "db/migrate/1_test.rb",
     "lib/couch-migrate.rb",
     "lib/couch_migrate/base_executer.rb",
     "lib/couch_migrate/base_migrater.rb",
