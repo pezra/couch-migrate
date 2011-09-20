@@ -37,33 +37,46 @@ describe "FileMigrater", "#migrate" do
     end
 
     it "handles a sequence of migration added over time" do
-      params = [:up, :quiet]
+      up_params = [:up, :quiet]
+      down_params = [:down, :quiet]
 
       # should succeed
       File.open(file_path_1,"w"){|f| f << "up do end" } 
-      migrater.migrate(*params).should == {success: [file_name_1]}
+      migrater.migrate(*up_params).should == {success: [file_name_1]}
 
       # should do nothing
-      migrater.migrate(*params).should == {}
+      migrater.migrate(*up_params).should == {}
 
       # should fail
       File.open(file_path_2,"w"){|f| f << "up do raise '2 simulated failure' end" }
-      migrater.migrate(*params).should == {success: [], failed: [file_name_2]}
+      migrater.migrate(*up_params).should == {success: [], failed: [file_name_2]}
 
       # should pass now
       File.open(file_path_2,"w"){|f| f << "up do end" }
-      migrater.migrate(*params).should == {success: [file_name_2]}
+      migrater.migrate(*up_params).should == {success: [file_name_2]}
+
+      # Down
+      migrater.migrate(*down_params).should == {success: [file_name_2]}
+
+      # up
+      migrater.migrate(*up_params).should == {success: [file_name_2]}
 
       # should succeed
       File.open(file_path_3,"w"){|f| f << "up do end" }
-      migrater.migrate(*params).should == {success: [file_name_3]}
+      migrater.migrate(*up_params).should == {success: [file_name_3]}
 
       # should do nothing
-      migrater.migrate(*params).should == {}
+      migrater.migrate(*up_params).should == {}
 
       # resetting the migration causes all to be run next time
       migrater.reset
-      migrater.migrate(*params).should == {success: [file_name_1, file_name_2, file_name_3]}
+      migrater.migrate(*up_params).should == {success: [file_name_1, file_name_2, file_name_3]}
+
+      # resetting the migration causes all to be run next time
+      migrater.reset
+
+      # Down does nothing
+      migrater.migrate(*down_params).should == {}
     end
 
   end

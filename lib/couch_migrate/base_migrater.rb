@@ -15,29 +15,34 @@ module CouchMigrate
       executer_args = args - migration_reserved_args
 
       @failed_migration, completed = nil, []
+      direction, action, migrations = if args.include?(:down)
+        [:down, :remove, [filter_and_sort(completed_migrations).last]]
+      else
+        [:up, :add, pending_migrations]
+      end
 
-      pending_migrations.each do |migration|
+      migrations.compact.each do |migration|
         begin
-          puts '-'*40, "Migration: (#{migration})" unless args.include?(:quiet)
+          puts '-'*40, "Migration #{direction} (#{migration})" unless args.include?(:quiet)
           str = File.read(@directory + migration)
           @executer.new(executer_args, str).go
           completed << migration
           puts '-'*40 unless args.include?(:quiet)
         rescue Exception => e
           @failed_migration = migration
-          puts '-'*5,"FAILURE in migration (#{migration}) with message:", e.message, '-'*5, e.backtrace[0...10], '-'*40 unless args.include?(:quiet)
+          puts '-'*5,"FAILURE in migration #{direction} (#{migration}) with message:", e.message, '-'*5, e.backtrace[0...10], '-'*40 unless args.include?(:quiet)
           return {success: completed, failed: [@failed_migration]}
         end
       end
 
       return completed.empty? ? {} : {success: completed}
     ensure
-      @completed_migrations << completed
+      @completed_migrations.send(action, completed)
     end
 
     def directory(path=nil)
       return @directory if path.nil?
-      @directory = path
+      @directory = Pathname.new(path)
       refresh_raw_migrations
       self
     end
@@ -77,7 +82,7 @@ module CouchMigrate
 
     private
 
-    def filter_and_sort(arr)
+    def filter_and_sort(arr= [])
       # discard invalid formats, then sort numerically by first number, then alphabetically for remainder
       format = /(\d+)_(.*)\.rb/
       arr.map do |e|

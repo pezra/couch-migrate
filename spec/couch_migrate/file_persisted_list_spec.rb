@@ -24,18 +24,18 @@ describe CouchMigrate::FilePersistedList do
     more = [4,5]
     expected = [1,2,3,4,5]
 
-    subject.set(arr) << more
-    subject.get.should == arr
+    subject.set(arr).add(more)
+    subject.get.should == expected
   end
 
   it "can be reset" do
     subject.set([1,2,3]).reset
-    subject
+    subject.get.should == []
   end
 
   it "is chainable" do
-    (subject.set([1]) << [2]).get.should == [1,2]
-    (subject.set([1]) << [2]).reset.get.should == []
+    subject.set([1]).add([2]).get.should == [1,2]
+    subject.set([1]).add([2]).reset.get.should == []
   end
 
 end

@@ -12,14 +12,21 @@ module CouchMigrate
 
     def set(arr)
       raise "argument must be an array" unless arr.is_a?(Array)
-      @list = arr
+      @list = arr.dup
       write
       self
     end
 
-    def <<(arr)
+    def add(arr)
       raise "argument must be an array" unless arr.is_a?(Array)
       @list.concat(arr).uniq!
+      write
+      self
+    end
+
+    def remove(arr)
+      raise "argument must be an array" unless arr.is_a?(Array)
+      @list -= arr
       write
       self
     end
