@@ -1,9 +1,125 @@
 = couch-migrate
 
-Description goes here.
+A simple migration system for CouchDB.
+
+This gem was created because we needed something more than what "rake
+db:seed" could provide.
+
+== Example Migration File
+
+    # File: db/migrate/1_name_of_migration.rb
+    up do
+      puts "this will be run when rake executes an 'up'"
+    end
+
+    down do
+      puts "this will be run when rake executes a 'down'"
+    end
+
+== Example Migration File Using CouchRest::Model
+
+    # File: db/migrate/2_another_migration.rb
+
+    # In order to lock model definitions to a point in time (so
+    # migrations will work in the future even after models change),
+    # classes can be defined in a migration, that are namespaced
+    # automatically yet still work with CouchDB's usage of the 'type'
+    # field. In order to use CouchRest::Models, include this line:
+    # use_couchrest_model
+
+    use_couchrest_model
+
+    # Defined in app/models/account.rb, but duplicated here without any
+    # validations or domain logic, in order to lock the model definition
+    # to this point in time.
+    class Account < CouchRest::Model::Base
+      property :name, String
+      property :description, String
+      collection_of :things, class_name: Thing
+    end
+
+    class Thing < CouchRest::Model::Base
+      belongs_to :account, class_name: Account
+      property :name, String
+      property :characteristics,     [String]
+      timestamps!
+    end
+
+    up do
+      # an example of limiting whether a migration runs or not. In this
+      # case, only run this migration if the CouchDB database is
+      # approximately empty.
+      begin
+        threshold = 5
+        db = Account.database # the db url, obtained however you feel
+        if db.info['doc_count'] > threshold
+          puts "Database (#{db.to_s}) has more than #{threshold} documents. This migration will not run"
+          return
+        end
+      rescue
+      end
+
+      Account.create! do |a|
+        a.name = "A new account"
+
+        a.things << Thing.create! do |t|
+          t.name = "Thing # 1"
+          t.characteristics << "Awesome"
+          t.characteristics << "Joy bringing"
+          t.hidden = false
+        end
+        # example code. not tested
+      end
+
+    end
+
+== Example Rake Task
+
+    def migrater
+      couch_db_url = 'http://127.0.0.1:5984/couch-migrate_test'
+      # or, if you are using CouchRest::Model
+      # require 'your_couchreset_model_class'
+      # couch_db_url = YourCouchRestModelClass.database.to_s
+      CouchMigrate::CouchMigrater.new(couch_db_url)
+    end
+
+    namespace :db do
+      desc 'migrate all pending migrations'
+      task :migrate => ['migrate:up']
+
+      namespace :migrate do
+        desc 'couchdb migration up'
+        task 'up' => [:environment, :url] do
+          migrater.migrate(:up)
+        end
+
+        desc 'couchdb migration down'
+        task 'down' => [:environment, :url] do
+          migrater.migrate(:down)
+        end
+
+        desc 'couchdb migration down, then up'
+        task 'redo' => [:environment, :url] do
+          migrater.migrate(:down)
+          migrater.migrate(:up)
+        end
+
+        desc 'print couchdb URL'
+        task 'url' => :environment do
+          $stderr.puts("CouchDB URL: #{CloudProvider.database.to_s}")
+        end
+
+      end
+    end
+
+== Thanks
+
+Thanks to OpenLogic (http://openlogic.com), a great company that
+focuses on supporting the Open Source market, for allowing this work to
+be open sourced.
 
 == Contributing to couch-migrate
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 * Fork the project
@@ -14,6 +130,6 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2011 Greg Edwards. See LICENSE.txt for
+Copyright (c) 2011 OpenLogic, Inc. and Greg Edwards. See LICENSE.txt for
 further details.
 
