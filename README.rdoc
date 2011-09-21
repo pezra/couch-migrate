@@ -27,7 +27,7 @@ db:seed" could provide.
     # field. In order to use CouchRest::Models, include this line:
     # use_couchrest_model
 
-    use_couchrest_model
+    use_couchrest_model # this must appear before any class definitions
 
     # Defined in app/models/account.rb, but duplicated here without any
     # validations or domain logic, in order to lock the model definition
@@ -43,6 +43,9 @@ db:seed" could provide.
       property :name, String
       property :characteristics,     [String]
       timestamps!
+      design do
+        view :by_name # views work as expected
+      end
     end
 
     up do
