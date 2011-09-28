@@ -1,4 +1,5 @@
 require 'couchrest'
+require_relative 'base_persisted_list'
 
 module CouchMigrate
   class CouchPersistedList < BasePersistedList

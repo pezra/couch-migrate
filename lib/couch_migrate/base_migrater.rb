@@ -1,3 +1,6 @@
+require_relative 'base_executer'
+require_relative 'base_persisted_list'
+
 module CouchMigrate
   class BaseMigrater
     attr_reader :failed_migration
