@@ -15,23 +15,30 @@ describe "BaseMigrater", "#migrate" do
   end
 
   context "interacting with the file system" do
-    let(:path){ Pathname.new("spec/tmp") }
-    let(:file_1){ path + file_name_1 }
-    let(:file_2){ path + file_name_2 }
-    let(:file_3){ path + file_name_3 }
+    include FakeFS
 
-    before(:all) do
-      path.mkpath
-      File.open(file_3,"w"){|f| f << "up do end" }
-      File.open(file_2,"w"){|f| f << "up do raise '2 simulated failure' end" }
-      File.open(file_1,"w"){|f| f << "up do end" }
+    before do 
+      FakeFS.activate!
     end
 
-    after(:all) do
-      file_1.delete
-      file_2.delete
-      file_3.delete
-      path.rmdir rescue nil
+    def self.migration(name, file_name, content="up do end")
+      let!(name) {
+        file_name = send(file_name) if Symbol === file_name
+        (path + file_name).tap do |f|
+          File.open(f, 'w') {|f| f << content}
+        end
+      }
+    end
+    
+    let(:path){ Pathname.new("/tmp/dm/migrate").tap{|p| p.mkpath} }
+
+    migration(:file_1, :file_name_1)
+    migration(:file_2, :file_name_2, "up do raise '2 simulated failure' end" )
+    migration(:file_3, :file_name_3)
+    migration(:editor_backup_file, ".#1_migration_a.rb")
+
+    after do
+      FakeFS.deactivate!
     end
 
     it "reads the db/migrations directory to generate a list of potential migrations to run" do

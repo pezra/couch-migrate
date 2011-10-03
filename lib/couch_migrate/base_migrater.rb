@@ -87,7 +87,7 @@ module CouchMigrate
 
     def filter_and_sort(arr= [])
       # discard invalid formats, then sort numerically by first number, then alphabetically for remainder
-      format = /(\d+)_(.*)\.rb/
+      format = /^(\d+)_(.*)\.rb$/
       arr.map do |e|
         name = Pathname.new(e).basename.to_s
         match = format.match(name)
