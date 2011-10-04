@@ -1,5 +1,6 @@
 require_relative 'base_executer'
 require_relative 'base_persisted_list'
+require 'pathname'
 
 module CouchMigrate
   class BaseMigrater

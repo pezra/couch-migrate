@@ -3,9 +3,9 @@ require 'yaml'
 
 module CouchMigrate
   class FilePersistedList < BasePersistedList
-    def initialize(directory="db/migrate")
+    def initialize(meta_file_directory="db/migrate")
       super()
-      path = Pathname.new(directory)
+      path = Pathname.new(meta_file_directory)
       path.mkpath
       @path = path+"meta.yml"
       read
@@ -26,7 +26,8 @@ module CouchMigrate
     end
 
     def cleanup
-      @path.delete rescue nil
+      File.delete(@path.to_s) rescue nil
+      # @path.delete rescue nil # fakefs does not handle this correctly
     end
 
   end
