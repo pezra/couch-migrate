@@ -1,61 +1,20 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require 'couch-migrate'
+require 'pathname'
+require 'fakefs/spec_helpers'
 
-describe "BaseMigrater", "#migrate" do
-  subject { CouchMigrate::BaseMigrater.new }
+describe CouchMigrate::BaseMigrater, "sorting and filtering" do
 
-  let(:file_name_1){ "1_migration_a.rb" }
-  let(:file_name_2){ "2_migration_b.rb" }
-  let(:file_name_3){ "3_migration_b.rb" }
-
-  it "can set migrations from a list" do
-    subject.raw_migrations.should == []
-
-    subject.raw_migrations([file_name_1, file_name_2]).raw_migrations.should == [file_name_1,file_name_2]
+  it "ignores files that do not follow the migrationOrder_migration_title format" do
+    names = [
+      '2_name.rb', #valid
+      'a_bad_name.rb', #invalid
+      '.#1_migration_a.rb', #invalid
+      '3_name.rb', #valid
+    ]
+    subject.raw_migrations(names)
+    subject.raw_migrations.should == ['2_name.rb', '3_name.rb']
   end
-
-  context "interacting with the file system" do
-    let(:path){ Pathname.new("spec/tmp") }
-    let(:file_1){ path + file_name_1 }
-    let(:file_2){ path + file_name_2 }
-    let(:file_3){ path + file_name_3 }
-
-    before(:all) do
-      path.mkpath
-      File.open(file_3,"w"){|f| f << "up do end" }
-      File.open(file_2,"w"){|f| f << "up do raise '2 simulated failure' end" }
-      File.open(file_1,"w"){|f| f << "up do end" }
-    end
-
-    after(:all) do
-      file_1.delete
-      file_2.delete
-      file_3.delete
-      path.rmdir rescue nil
-    end
-
-    it "reads the db/migrations directory to generate a list of potential migrations to run" do
-      subject.directory(path).raw_migrations.should == [file_name_1, file_name_2, file_name_3]
-      subject.directory(path).pending_migrations.should == [file_name_1, file_name_2, file_name_3]
-    end
-
-    it "stops when a migration file exits with an error, not processing any subsequent files afterwards" do
-      subject.directory(path).pending_migrations.should == [file_name_1, file_name_2, file_name_3]
-      subject.migrate(:quiet, :up).should == {success: [file_name_1], failed: [file_name_2]}
-      subject.failed_migration.should == file_name_2
-      subject.pending_migrations.should == [file_name_2, file_name_3]
-    end
-
-  end
-
-  it "does not execute migrations that have already been run" do
-    subject.raw_migrations([file_name_1, file_name_2]).completed_migrations([file_name_1]).pending_migrations.should == [file_name_2]
-  end
-
-end
-
-describe "BaseMigrater", "sorting and filtering" do
-  subject { CouchMigrate::BaseMigrater.new }
 
   it "sorts on migration numbers" do
     subject.raw_migrations(['2_name.rb','1_name.rb', '3_name.rb'])
@@ -82,9 +41,55 @@ describe "BaseMigrater", "sorting and filtering" do
     subject.raw_migrations.should == ['2_name.rb', '10_name.rb']
   end
 
-  it "ignores files that do not have follow the migrationOrder_migration_title format" do
-    subject.raw_migrations(['2_name.rb','a_bad_name.rb'])
-    subject.raw_migrations.should == ['2_name.rb']
+end
+
+describe CouchMigrate::BaseMigrater, "#migrate" do
+
+  let(:file_name_1){ "1_migration_a.rb" }
+  let(:file_name_2){ "2_migration_b.rb" }
+  let(:file_name_3){ "3_migration_b.rb" }
+
+  it "can set migrations from a list" do
+    subject.raw_migrations.should == []
+
+    subject.raw_migrations([file_name_1, file_name_2]).raw_migrations.should == [file_name_1,file_name_2]
+  end
+
+  it "does not execute migrations that have already been run" do
+    subject.raw_migrations([file_name_1, file_name_2]).completed_migrations([file_name_1]).pending_migrations.should == [file_name_2]
+  end
+
+  context "interacting with the file system" do
+    include FakeFS::SpecHelpers
+
+    let(:path){ Pathname.new("spec/tmp").tap{|p| p.mkpath} }
+
+    before(:each) do
+      # create migration files
+      [
+        [file_name_1, "up do end" ],
+        [file_name_2, "up do raise '2 simulated failure' end" ],
+        [file_name_3, "up do end" ],
+      ].each do |file_name, content|
+        File.open(path+file_name, 'w') {|f| f << content}
+      end
+
+    end
+
+    it "reads the db/migrations directory to generate a list of potential migrations to run" do
+      subject.directory(path).raw_migrations.should == [file_name_1, file_name_2, file_name_3]
+      subject.directory(path).pending_migrations.should == [file_name_1, file_name_2, file_name_3]
+    end
+
+    it "stops when a migration file exits with an error, not processing any subsequent files afterwards" do
+      subject.directory(path).pending_migrations.should == [file_name_1, file_name_2, file_name_3]
+
+      subject.migrate(:quiet, :up).should == {success: [file_name_1], failed: [file_name_2]}
+
+      subject.failed_migration.should == file_name_2
+      subject.pending_migrations.should == [file_name_2, file_name_3]
+    end
+
   end
 
 end

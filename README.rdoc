@@ -115,6 +115,14 @@ db:seed" could provide.
       end
     end
 
+== Note
+
+This gem requires Ruby 1.9 only because of the use of
+"require_relative". In the true spirit of open source, if you would like
+to use this gem with Ruby 1.8, please fork it, fix those requires, enjoy
+using it, and then submit a pull request. One gold star will be awarded
+to the person who does this.
+
 == Thanks
 
 Thanks to OpenLogic (http://openlogic.com), a great company that

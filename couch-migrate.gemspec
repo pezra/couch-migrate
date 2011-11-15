@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "couch-migrate.gemspec",
-    "db/migrate/1_test.rb",
+    "db/migrate/1_example.rb",
     "lib/couch-migrate.rb",
     "lib/couch_migrate/base_executer.rb",
     "lib/couch_migrate/base_migrater.rb",
@@ -46,6 +46,8 @@ Gem::Specification.new do |s|
     "spec/couch_migrate/couch_persisted_list_spec.rb",
     "spec/couch_migrate/file_migrater_spec.rb",
     "spec/couch_migrate/file_persisted_list_spec.rb",
+    "spec/couch_migrate/shared_persisted_list.rb",
+    "spec/couch_migrate/shared_sequential_migrations.rb",
     "spec/spec_helper.rb"
   ]
   s.homepage = %q{https://github.com/gedwards/couch-migrate}
@@ -59,29 +61,31 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<couchrest>, [">= 0"])
-      s.add_development_dependency(%q<rspec>, ["~> 2.3.0"])
+      s.add_development_dependency(%q<rspec>, ["~> 2.6.0"])
       s.add_development_dependency(%q<yard>, ["~> 0.6.0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
       s.add_development_dependency(%q<couchrest_model>, [">= 0"])
+      s.add_development_dependency(%q<fakefs>, [">= 0"])
     else
       s.add_dependency(%q<couchrest>, [">= 0"])
-      s.add_dependency(%q<rspec>, ["~> 2.3.0"])
+      s.add_dependency(%q<rspec>, ["~> 2.6.0"])
       s.add_dependency(%q<yard>, ["~> 0.6.0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<rcov>, [">= 0"])
       s.add_dependency(%q<couchrest_model>, [">= 0"])
+      s.add_dependency(%q<fakefs>, [">= 0"])
     end
   else
     s.add_dependency(%q<couchrest>, [">= 0"])
-    s.add_dependency(%q<rspec>, ["~> 2.3.0"])
+    s.add_dependency(%q<rspec>, ["~> 2.6.0"])
     s.add_dependency(%q<yard>, ["~> 0.6.0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
     s.add_dependency(%q<rcov>, [">= 0"])
     s.add_dependency(%q<couchrest_model>, [">= 0"])
+    s.add_dependency(%q<fakefs>, [">= 0"])
   end
 end
-

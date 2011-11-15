@@ -28,7 +28,6 @@ module CouchMigrate
     def cleanup
       @list = []
       write
-      self
     end
 
   end
