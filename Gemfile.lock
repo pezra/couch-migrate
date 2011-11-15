@@ -39,7 +39,6 @@ GEM
     rspec-expectations (2.6.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.6.0)
-    rspec-mocks (2.3.0)
     tzinfo (0.3.31)
     yard (0.6.8)
 
@@ -49,8 +48,8 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.0.0)
   couchrest
-  fakefs
   couchrest_model
+  fakefs
   jeweler (~> 1.6.4)
   rcov
   rspec (~> 2.6.0)
