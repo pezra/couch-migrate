@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{couch-migrate}
-  s.version = "2.0.0"
+  s.version = "1.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Greg Edwards"]
@@ -66,7 +66,6 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
-      s.add_development_dependency(%q<couchrest_model>, [">= 0"])
       s.add_development_dependency(%q<fakefs>, [">= 0"])
     else
       s.add_dependency(%q<couchrest>, [">= 0"])
@@ -75,7 +74,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<rcov>, [">= 0"])
-      s.add_dependency(%q<couchrest_model>, [">= 0"])
       s.add_dependency(%q<fakefs>, [">= 0"])
     end
   else
@@ -85,7 +83,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
     s.add_dependency(%q<rcov>, [">= 0"])
-    s.add_dependency(%q<couchrest_model>, [">= 0"])
     s.add_dependency(%q<fakefs>, [">= 0"])
   end
 end
+
