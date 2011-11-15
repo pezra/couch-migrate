@@ -1,0 +1,8 @@
+2.0.0 
+---- 
+
+Prevent models defined in migration from auto updating their design
+documents (and there by overwriting the real ones).  This is a major
+change and may require modification existing migrations to allow boot
+strapping using migration.
+ 

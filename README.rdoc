@@ -44,7 +44,7 @@ db:seed" could provide.
       property :characteristics,     [String]
       timestamps!
       design do
-        view :by_name # views work as expected
+        view :by_name
       end
     end
 
@@ -61,6 +61,11 @@ db:seed" could provide.
         end
       rescue
       end
+
+      Thing.save_design_doc  # you have to manually save the design
+                             # document for the view to work.  NOTE:
+                             # this will destroy any views not
+                             # declared in this file.
 
       Account.create! do |a|
         a.name = "A new account"
