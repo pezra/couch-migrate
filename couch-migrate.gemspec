@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{couch-migrate}
-  s.version = "2.0.1"
+  s.version = "2.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Greg Edwards"]
-  s.date = %q{2011-11-15}
+  s.date = %q{2011-11-16}
   s.description = %q{A simple migration system for CouchDB.}
   s.email = %q{greg@greglearns.com}
   s.extra_rdoc_files = [
@@ -45,7 +45,6 @@ Gem::Specification.new do |s|
     "spec/couch_migrate/base_persisted_list_spec.rb",
     "spec/couch_migrate/couch_migrater_spec.rb",
     "spec/couch_migrate/couch_persisted_list_spec.rb",
-    "spec/couch_migrate/extend_spec.rb",
     "spec/couch_migrate/file_migrater_spec.rb",
     "spec/couch_migrate/file_persisted_list_spec.rb",
     "spec/couch_migrate/shared_persisted_list.rb",
