@@ -4,8 +4,6 @@ require 'fakefs/spec_helpers'
 shared_examples_for "sequential_migrations" do
   let(:path){ raise "a path must be defined by the grouping using these shared examples" }
 
-  include FakeFS::SpecHelpers
-
   def migrater
     # allows new migrations to be picked up
     raise "Groups that include shared examples for sequential migrations must implement a migrater function that returns a new migration object"

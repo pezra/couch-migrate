@@ -11,6 +11,20 @@ module CouchMigrate
       self
     end
 
+    def migrate(*args)
+      if defined?( CouchRest::Model::Base)
+        orig_auto_update_design_doc = CouchRest::Model::Base.auto_update_design_doc
+        CouchRest::Model::Base.auto_update_design_doc = false
+      end
+      begin
+        super
+      ensure
+        if defined?(CouchRest::Model::Base)
+          CouchRest::Model::Base.auto_update_design_doc = orig_auto_update_design_doc 
+        end
+      end
+    
+    end
   end
 end
 

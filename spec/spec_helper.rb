@@ -1,3 +1,5 @@
+require 'fakefs/safe'
+
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'rspec'
@@ -8,5 +10,13 @@ require 'fakefs/safe'
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 RSpec.configure do |config|
+  config.before(:each) do 
+    FakeFS::FileSystem.clear
+    FakeFS.activate!
+  end
   
+  config.after(:each) do 
+    FakeFS.deactivate!
+    FakeFS::FileSystem.clear
+  end  
 end

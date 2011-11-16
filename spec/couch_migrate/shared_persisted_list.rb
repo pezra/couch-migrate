@@ -1,8 +1,4 @@
-require 'fakefs/spec_helpers'
-
 shared_examples_for "a_persisted_list" do
-  include FakeFS::SpecHelpers
-
   subject { raise "subject must return a new instance" }
 
   it "starts off with an empty value/list" do
